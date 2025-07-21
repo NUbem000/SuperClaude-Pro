@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # Development environment
+  dev:
+    build:
+      context: .
+      target: development
+    image: superclaude-pro:dev
+    container_name: superclaude-dev
+    volumes:
+      - .:/app
+      - ~/.claude:/home/superclaude/.claude
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - SUPERCLAUDE_ENV=development
+      - PYTHONPATH=/app/src
+    stdin_open: true
+    tty: true
+    command: bash
+    networks:
+      - superclaude
+
+  # Testing environment
+  test:
+    build:
+      context: .
+      target: testing
+    image: superclaude-pro:test
+    container_name: superclaude-test
+    volumes:
+      - .:/app
+      - test-results:/app/test-results
+    environment:
+      - SUPERCLAUDE_ENV=testing
+      - PYTHONPATH=/app/src
+    command: |
+      bash -c "
+        pytest --cov=superclaude_pro \
+               --cov-report=term-missing \
+               --cov-report=html:/app/test-results/htmlcov \
+               --cov-report=xml:/app/test-results/coverage.xml \
+               --junit-xml=/app/test-results/junit.xml
+      "
+    networks:
+      - superclaude
+
+  # Linting and type checking
+  lint:
+    build:
+      context: .
+      target: development
+    image: superclaude-pro:dev
+    container_name: superclaude-lint
+    volumes:
+      - .:/app
+    command: |
+      bash -c "
+        echo 'Running ruff...' && 
+        ruff check . && 
+        echo 'Running mypy...' && 
+        mypy src/superclaude_pro && 
+        echo 'All checks passed!'
+      "
+    networks:
+      - superclaude
+
+  # Documentation server
+  docs:
+    build:
+      context: .
+      target: development
+    image: superclaude-pro:dev
+    container_name: superclaude-docs
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    command: |
+      bash -c "
+        cd docs && 
+        mkdocs serve --dev-addr 0.0.0.0:8000
+      "
+    networks:
+      - superclaude
+
+  # Production image test
+  prod:
+    build:
+      context: .
+      target: production
+    image: superclaude-pro:latest
+    container_name: superclaude-prod
+    volumes:
+      - ~/.claude:/home/superclaude/.claude
+    environment:
+      - SUPERCLAUDE_ENV=production
+    command: superclaude-pro status
+    networks:
+      - superclaude
+
+networks:
+  superclaude:
+    driver: bridge
+
+volumes:
+  test-results:
