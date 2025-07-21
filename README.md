@@ -19,15 +19,37 @@
 
 ## 🚀 Instalación Rápida
 
-```bash
-# Usando uv (recomendado)
-uv pip install superclaude-pro
+### Opción 1: Script de Instalación (Más Fácil)
 
-# O usando pip
+```bash
+# Descargar y ejecutar el script de instalación
+curl -sSL https://raw.githubusercontent.com/NUbem000/SuperClaude-Pro/main/install.sh | bash
+```
+
+### Opción 2: Instalación Manual
+
+```bash
+# Usando pip
 pip install superclaude-pro
+
+# O usando uv (más rápido)
+uv pip install superclaude-pro
 
 # Ejecutar instalador
 superclaude-pro install
+
+# Reiniciar Claude Code
+```
+
+### Opción 3: Desde el Repositorio
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/NUbem000/SuperClaude-Pro.git
+cd SuperClaude-Pro
+
+# Ejecutar script de instalación
+./install.sh
 ```
 
 ## 📚 Documentación
